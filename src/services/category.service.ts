@@ -37,6 +37,7 @@ export class CategoryService extends CategoryHelpers{
 
     public getAllWLanguage(req:Request, res:Response){
 
+
         Category.aggregate([{
             "$lookup":{
                 from: "languages",
@@ -51,7 +52,31 @@ export class CategoryService extends CategoryHelpers{
                 res.status(200).json(data);
             }
         })
+    }
 
+    // Service que devuelve una categoria y todos los languages que le pertenecen
+    public async getOneWLanguages(req:Request, res:Response){
+        const cat:any = await super.GetCategory({_id:req.params.id});
+        console.log(cat[0].id);
+        Category.aggregate([{"$match": {_id: cat[0]._id}},{
+            "$lookup":{
+                from: "languages",
+                localField:"_id",
+                foreignField:"category",
+                as: "l"
+            }
+        }],(err:Error,data:any)=>{
+            if(err){
+                res.status(401).send(err);
+            }else{
+                res.status(200).json(data);
+            }
+        });
+    }
+
+    public async getOne(req:Request, res:Response){
+        const cat:any = await super.GetCategory({_id:req.params.id});
+        res.status(200).json(cat[0]);
     }
 
     public async NewOne(req: Request, res: Response){        
